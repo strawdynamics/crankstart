@@ -215,6 +215,19 @@ impl SpriteInner {
         pd_func_caller!((*self.playdate_sprite).setZIndex, self.raw_sprite, z_index)
     }
 
+    pub fn set_center(&mut self, x: f32, y: f32) -> Result<(), Error> {
+        pd_func_caller!((*self.playdate_sprite).setCenter, self.raw_sprite, x, y)
+    }
+
+    pub fn set_ignores_draw_offset(&mut self, flag: bool) -> Result<(), Error> {
+        let int_flag = if flag { 1 } else { 0 };
+        pd_func_caller!(
+            (*self.playdate_sprite).setIgnoresDrawOffset,
+            self.raw_sprite,
+            int_flag
+        )
+    }
+
     /// Returns a reference to the bitmap assigned to the sprite, if any.
     pub fn get_image(&self) -> Option<&Bitmap> {
         self.image.as_ref()
@@ -406,6 +419,20 @@ impl Sprite {
             .try_borrow_mut()
             .map_err(Error::msg)?
             .set_z_index(z_index)
+    }
+
+    pub fn set_center(&self, x: f32, y: f32) -> Result<(), Error> {
+        self.inner
+            .try_borrow_mut()
+            .map_err(Error::msg)?
+            .set_center(x, y)
+    }
+
+    pub fn set_ignores_draw_offset(&self, flag: bool) -> Result<(), Error> {
+        self.inner
+            .try_borrow_mut()
+            .map_err(Error::msg)?
+            .set_ignores_draw_offset(flag)
     }
 
     /// Returns a reference to the bitmap assigned to the sprite, if any.  Specifically,
