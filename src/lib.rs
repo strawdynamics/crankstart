@@ -14,6 +14,8 @@ pub mod sound;
 pub mod sprite;
 pub mod system;
 
+use geometry::{ScreenCoord, ScreenPoint};
+
 use {
     crate::{
         display::Display,
@@ -125,6 +127,10 @@ pub trait Game {
     fn draw_and_update_sprites(&self) -> bool {
         true
     }
+
+    fn fps_pos(&self) -> ScreenPoint {
+        ScreenPoint::zero()
+    }
 }
 
 pub type GamePtr<T> = Box<T>;
@@ -159,7 +165,8 @@ impl<T: 'static + Game> GameRunner<T> {
                 }
             }
             if game.draw_fps() {
-                if let Err(err) = System::get().draw_fps(0, 0) {
+                let fps_pos = game.fps_pos();
+                if let Err(err) = System::get().draw_fps(fps_pos.x, fps_pos.y) {
                     log_to_console!("Error from system().draw_fps: {err:#}")
                 }
             }
