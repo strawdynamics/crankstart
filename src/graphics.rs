@@ -28,12 +28,13 @@ pub fn rect_make(x: f32, y: f32, width: f32, height: f32) -> PDRect {
 }
 
 #[derive(Clone, Debug)]
-pub enum LCDColor {
+pub enum LCDColor<'t> {
     Solid(LCDSolidColor),
+    PatternRef(&'t LCDPattern),
     Pattern(LCDPattern),
 }
 
-impl From<LCDColor> for usize {
+impl From<LCDColor<'_>> for usize {
     fn from(color: LCDColor) -> Self {
         match color {
             LCDColor::Solid(solid_color) => solid_color as usize,
@@ -41,6 +42,7 @@ impl From<LCDColor> for usize {
                 let pattern_ptr = &pattern as *const u8;
                 pattern_ptr as usize
             }
+            LCDColor::PatternRef(pattern) => (pattern as *const u8) as usize,
         }
     }
 }
@@ -324,10 +326,6 @@ impl Bitmap {
         Ok(Self {
             inner: Rc::new(RefCell::new(inner)),
         })
-    }
-
-    pub fn into_color(&self, bitmap: Bitmap, top_left: Point2D<i32>) -> Result<LCDColor, Error> {
-        self.inner.borrow().into_color(bitmap, top_left)
     }
 
     pub fn load(&self, path: &str) -> Result<(), Error> {
